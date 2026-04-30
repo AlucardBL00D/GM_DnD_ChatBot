@@ -1,4 +1,6 @@
 import { geolocation, ipAddress } from "@vercel/functions";
+import { buildSystemPrompt } from "@/lib/system-prompt";
+import { createTools } from "@/lib/tools";
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -16,6 +18,7 @@ import {
   allowedModelIds,
   chatModels,
   DEFAULT_CHAT_MODEL,
+  DEFAULT_MODEL,
   getCapabilities,
 } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
@@ -191,15 +194,25 @@ export async function POST(request: Request) {
     const stream = createUIMessageStream({
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
       execute: async ({ writer: dataStream }) => {
-        const result = streamText({
-          model: getLanguageModel(chatModel),
-          system: systemPrompt({ requestHints, supportsTools }),
-          messages: modelMessages,
-          stopWhen: stepCountIs(5),
+      const bearerToken = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+      const result = streamText({
+        model: getLanguageModel(chatModel),
+        system: buildSystemPrompt(),
+        messages: modelMessages,
+        stopWhen: stepCountIs(5),
           experimental_activeTools:
             isReasoningModel && !supportsTools
               ? []
               : [
+                  "rollDice",
+                  "searchRulebook",
+                  "updateCharacterState",
+                  "updateWorldState",
+                  "getSkillDetails",
+                  "searchDocuments",
+                  "getItems",
+                  "getItemById",
+                  "submitAction",
                   "getWeather",
                   "createDocument",
                   "editDocument",
@@ -215,6 +228,7 @@ export async function POST(request: Request) {
             }),
           },
           tools: {
+            ...createTools(bearerToken),
             getWeather,
             createDocument: createDocument({
               session,

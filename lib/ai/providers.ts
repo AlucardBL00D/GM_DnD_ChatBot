@@ -1,3 +1,4 @@
+import { anthropic } from "@ai-sdk/anthropic";
 import { customProvider, gateway } from "ai";
 import { isTestEnvironment } from "../constants";
 import { titleModel } from "./models";
@@ -19,6 +20,10 @@ export function getLanguageModel(modelId: string) {
     return myProvider.languageModel(modelId);
   }
 
+  if (modelId.startsWith("claude-")) {
+    return anthropic(modelId);
+  }
+
   return gateway.languageModel(modelId);
 }
 
@@ -26,5 +31,11 @@ export function getTitleModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("title-model");
   }
+  
+  // Route the title model to the correct provider based on its ID
+  if (titleModel.id.startsWith("claude-")) {
+    return anthropic(titleModel.id);
+  }
+  
   return gateway.languageModel(titleModel.id);
 }

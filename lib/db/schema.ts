@@ -9,6 +9,7 @@ import {
   timestamp,
   uuid,
   varchar,
+  vector,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("User", {
@@ -134,3 +135,15 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const documentChunk = pgTable("DocumentChunk", {
+  id:        uuid("id").primaryKey().notNull().defaultRandom(),
+  fileName:  text("fileName").notNull(),
+  blobUrl:   text("blobUrl").notNull(),
+  content:   text("content").notNull(),
+  embedding: vector("embedding", { dimensions: 512 }),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  userId:    uuid("userId").notNull().references(() => user.id),
+});
+
+export type DocumentChunk = InferSelectModel<typeof documentChunk>;

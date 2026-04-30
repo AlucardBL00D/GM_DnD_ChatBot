@@ -51,6 +51,21 @@ export type RegisterActionState = {
     | "invalid_data";
 };
 
+export type GuestLoginActionState = {
+  status: "idle" | "in_progress" | "success" | "failed";
+};
+
+export const loginAsGuest = async (): Promise<GuestLoginActionState> => {
+  try {
+    await signIn("guest", {
+      redirect: false,
+    });
+    return { status: "success" };
+  } catch (error) {
+    return { status: "failed" };
+  }
+};
+
 export const register = async (
   _: RegisterActionState,
   formData: FormData
