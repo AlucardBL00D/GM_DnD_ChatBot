@@ -12,6 +12,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useActiveChat } from "@/hooks/use-active-chat";
+import { useCharacterStats } from "@/hooks/use-character-stats";
 import {
   initialArtifactData,
   useArtifact,
@@ -21,6 +22,7 @@ import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { ChatHeader } from "./chat-header";
+import { CharacterStats } from "./character-stats";
 import { DataStreamHandler } from "./data-stream-handler";
 import { submitEditedMessage } from "./message-editor";
 import { Messages } from "./messages";
@@ -48,6 +50,8 @@ export function ChatShell() {
     setShowCreditCardAlert,
   } = useActiveChat();
 
+  const { stats } = useCharacterStats();
+
   const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(
     null
   );
@@ -72,6 +76,7 @@ export function ChatShell() {
   return (
     <>
       <div className="flex h-dvh w-full flex-row overflow-hidden">
+        {/* Left sidebar with chat messages */}
         <div
           className={cn(
             "flex min-w-0 flex-col bg-sidebar transition-[width] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
@@ -149,6 +154,7 @@ export function ChatShell() {
           </div>
         </div>
 
+        {/* Center artifact panel (optional) */}
         <Artifact
           addToolApprovalResponse={addToolApprovalResponse}
           attachments={attachments}
@@ -167,6 +173,38 @@ export function ChatShell() {
           stop={stop}
           votes={votes}
         />
+        
+        {/* Right sidebar with character stats */}
+        {stats ? (
+          <CharacterStats 
+            stats={{
+              campaignName: stats.campaignName,
+              characterName: stats.characterName,
+              characterClass: stats.characterClass,
+              race: stats.race,
+              level: stats.level,
+              hp: stats.hp,
+              maxHp: stats.maxHp,
+              ac: stats.ac,
+              strength: stats.strength,
+              dexterity: stats.dexterity,
+              constitution: stats.constitution,
+              intelligence: stats.intelligence,
+              wisdom: stats.wisdom,
+              charisma: stats.charisma,
+              traits: stats.traits,
+              languages: stats.languages,
+              inventory: stats.inventory,
+              equipment: stats.equipment
+            }}
+          />
+        ) : (
+          <div className="w-96 border-l border-border/40 bg-sidebar p-4 flex items-center justify-center">
+            <p className="text-sm text-amber-100/50 text-center">
+              Create your character to see stats
+            </p>
+          </div>
+        )}
       </div>
 
       <DataStreamHandler />

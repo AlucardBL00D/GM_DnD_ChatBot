@@ -26,7 +26,7 @@ function rollDice(notation: string): { rolls: number[]; total: number; notation:
 
 // TODO: implement real API calls using createApiClient
 
-export function createTools(_token: string) {
+export function createTools(_token: string, dataStream?: any) {
   return {
     getSkillDetails: tool({
       description:
@@ -99,22 +99,48 @@ export function createTools(_token: string) {
 
     updateCharacterState: tool({
       description:
-        "Update the player character's state: HP, inventory, conditions, quest progress, relationships, or notes. Use this to track changes to the character's status.",
+        "Update the player character's stats: HP, level, inventory, equipment, traits, languages, etc. This will immediately update the character sheet displayed to the player.",
       inputSchema: z.object({
-        field: z
-          .enum(["hp", "inventory", "conditions", "quests", "relationships", "notes"])
-          .describe("What field to update"),
-        change: z
-          .string()
-          .describe("Description of the change (e.g., 'take 5 damage', 'add iron sword', 'gained favor with merchant')"),
+        hp: z.number().optional().describe("Current hit points"),
+        maxHp: z.number().optional().describe("Maximum hit points"),
+        level: z.number().optional().describe("Character level"),
+        ac: z.number().optional().describe("Armor class"),
+        inventory: z.string().optional().describe("Inventory items (one per line)"),
+        equipment: z.string().optional().describe("Equipped items (one per line)"),
+        traits: z.string().optional().describe("Character traits (one per line)"),
+        languages: z.string().optional().describe("Known languages (one per line)"),
+        characterName: z.string().optional().describe("Character name"),
+        characterClass: z.string().optional().describe("Character class"),
+        race: z.string().optional().describe("Character race"),
       }),
-      execute: async ({ field, change }) => {
-        // In a real system, this would update a database
+      execute: async ({ hp, maxHp, level, ac, inventory, equipment, traits, languages, characterName, characterClass, race }) => {
+        // Collect updated fields
+        const updates: Record<string, unknown> = {};
+        if (hp !== undefined) updates.hp = hp;
+        if (maxHp !== undefined) updates.maxHp = maxHp;
+        if (level !== undefined) updates.level = level;
+        if (ac !== undefined) updates.ac = ac;
+        if (inventory !== undefined) updates.inventory = inventory;
+        if (equipment !== undefined) updates.equipment = equipment;
+        if (traits !== undefined) updates.traits = traits;
+        if (languages !== undefined) updates.languages = languages;
+        if (characterName !== undefined) updates.characterName = characterName;
+        if (characterClass !== undefined) updates.characterClass = characterClass;
+        if (race !== undefined) updates.race = race;
+
+        // Send update to client via dataStream so it can update localStorage and UI
+        if (dataStream) {
+          dataStream.write({
+            type: "data-character-update",
+            data: updates,
+          });
+        }
+
+        // Return the updates so they can be processed by the UI
         return {
           success: true,
-          field,
-          change,
-          message: `Character state updated: ${change}`,
+          message: `Character state updated successfully`,
+          updates,
         };
       },
     }),

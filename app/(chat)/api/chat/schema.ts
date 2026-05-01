@@ -32,6 +32,28 @@ export const postRequestBodySchema = z.object({
   messages: z.array(toolApprovalMessageSchema).optional(),
   selectedChatModel: z.string(),
   selectedVisibilityType: z.enum(["public", "private"]),
+  characterContext: z
+    .object({
+      campaignName: z.string().optional(),
+      characterName: z.string().optional(),
+      characterClass: z.string().optional(),
+      race: z.string().optional(),
+      level: z.number().optional(),
+      hp: z.number().optional(),
+      maxHp: z.number().optional(),
+      ac: z.number().optional(),
+      strength: z.number().optional(),
+      dexterity: z.number().optional(),
+      constitution: z.number().optional(),
+      intelligence: z.number().optional(),
+      wisdom: z.number().optional(),
+      charisma: z.number().optional(),
+      traits: z.string().optional(),
+      languages: z.string().optional(),
+      inventory: z.string().optional(),
+      equipment: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type PostRequestBody = z.infer<typeof postRequestBodySchema>;

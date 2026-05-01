@@ -52,6 +52,16 @@ function PureChatHeader({
 
       <Button
         asChild
+        className="hidden rounded-lg md:flex"
+        variant="outline"
+      >
+        <Link href="/documents">
+          📚 Documents
+        </Link>
+      </Button>
+
+      <Button
+        asChild
         className="hidden rounded-lg bg-foreground px-4 text-background hover:bg-foreground/90 md:ml-auto md:flex"
       >
         <Link

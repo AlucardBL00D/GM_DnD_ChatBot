@@ -233,7 +233,8 @@ export async function getChatById({ id }: { id: string }) {
 
     return selectedChat;
   } catch (_error) {
-    throw new ChatbotError("bad_request:database", "Failed to get chat by id");
+    // Return null if chat doesn't exist or error occurs
+    return null;
   }
 }
 
@@ -261,16 +262,15 @@ export async function updateMessage({
 
 export async function getMessagesByChatId({ id }: { id: string }) {
   try {
-    return await db
+    const messages = await db
       .select()
       .from(message)
       .where(eq(message.chatId, id))
       .orderBy(asc(message.createdAt));
+    return messages || [];
   } catch (_error) {
-    throw new ChatbotError(
-      "bad_request:database",
-      "Failed to get messages by chat id"
-    );
+    // Return empty array if chat doesn't exist or error occurs
+    return [];
   }
 }
 

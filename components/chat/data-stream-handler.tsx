@@ -27,6 +27,22 @@ export function DataStreamHandler() {
         mutate(unstable_serialize(getChatHistoryPaginationKey));
         continue;
       }
+
+      if (delta.type === "data-character-update") {
+        // Get current character state from localStorage
+        const currentStats = localStorage.getItem("characterStats");
+        const stats = currentStats ? JSON.parse(currentStats) : {};
+
+        // Merge updates with current state
+        const updated = { ...stats, ...delta.data };
+
+        // Save back to localStorage
+        localStorage.setItem("characterStats", JSON.stringify(updated));
+
+        // Dispatch event to trigger character stats panel refresh
+        window.dispatchEvent(new Event("characterStatsUpdated"));
+        continue;
+      }
       const artifactDefinition = artifactDefinitions.find(
         (currentArtifactDefinition) =>
           currentArtifactDefinition.kind === artifact.kind

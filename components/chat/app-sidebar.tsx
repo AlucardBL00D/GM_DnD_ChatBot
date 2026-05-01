@@ -109,12 +109,12 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                     className="h-8 rounded-lg border border-sidebar-border text-[13px] text-sidebar-foreground/70 transition-colors duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                     onClick={() => {
                       setOpenMobile(false);
-                      router.push("/");
+                      router.push("/campaign");
                     }}
-                    tooltip="New Chat"
+                    tooltip="New Campaign"
                   >
                     <PenSquareIcon className="size-4" />
-                    <span className="font-medium">New chat</span>
+                    <span className="font-medium">New Campaign</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 {user && (

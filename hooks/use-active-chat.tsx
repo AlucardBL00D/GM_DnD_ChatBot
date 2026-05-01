@@ -138,6 +138,18 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
             })
           );
 
+        // Include character state from localStorage so the server/system prompt
+        // can receive the current character context (campaign, name, class, hp, etc.)
+        let characterContext: Record<string, unknown> | undefined = undefined;
+        try {
+          const raw = typeof window !== "undefined" ? localStorage.getItem("characterStats") : null;
+          if (raw) {
+            characterContext = JSON.parse(raw);
+          }
+        } catch (e) {
+          // ignore parse errors
+        }
+
         return {
           body: {
             id: request.id,
@@ -146,6 +158,7 @@ export function ActiveChatProvider({ children }: { children: ReactNode }) {
               : { message: lastMessage }),
             selectedChatModel: currentModelIdRef.current,
             selectedVisibilityType: visibility,
+            characterContext,
             ...request.body,
           },
         };

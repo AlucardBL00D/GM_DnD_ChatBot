@@ -9,8 +9,16 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
-  if (pathname.startsWith("/api/auth")) {
+  // Allow all API routes through
+  if (pathname.startsWith("/api/")) {
     return NextResponse.next();
+  }
+
+  // Redirect /chat to /chat/[id]
+  if (pathname === "/chat") {
+    // Generate a valid UUID
+    const uuid = crypto.randomUUID();
+    return NextResponse.redirect(new URL(`/chat/${uuid}`, request.url));
   }
 
   const token = await getToken({
@@ -21,7 +29,17 @@ export async function proxy(request: NextRequest) {
 
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-  if (!token) {
+  // Public pages - no auth required, no guest redirect
+  const publicPages = ["/", "/login", "/register"];
+  
+  // Protected pages - allow access, they'll handle auth checks themselves
+  const protectedPages = ["/chat", "/campaign", "/documents"];
+  
+  // Don't redirect to guest for public or protected pages
+  const isPublicPage = publicPages.includes(pathname) || 
+                       protectedPages.some(page => pathname === page || pathname.startsWith(page + "/"));
+  
+  if (!token && !isPublicPage) {
     const redirectUrl = encodeURIComponent(new URL(request.url).pathname);
 
     return NextResponse.redirect(
@@ -41,7 +59,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/",
+    "/chat",
     "/chat/:id",
+    "/campaign",
+    "/documents",
     "/api/:path*",
     "/login",
     "/register",

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function DocumentsPage() {
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [clearStatus, setClearStatus] = useState<"idle" | "clearing" | "success" | "error">("idle");
+  const [clearMessage, setClearMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -43,15 +46,53 @@ export default function DocumentsPage() {
     }
   }
 
+  async function handleClearRAG() {
+    if (!confirm("Are you sure you want to delete all documents? This cannot be undone.")) {
+      return;
+    }
+
+    setClearStatus("clearing");
+    setClearMessage("");
+
+    try {
+      const res = await fetch("/api/documents/clear", {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setClearStatus("error");
+        setClearMessage(data.error ?? "Clear failed.");
+        return;
+      }
+
+      setClearStatus("success");
+      setClearMessage(
+        `Successfully deleted ${data.deleted} document chunks from the RAG.`,
+      );
+    } catch (err) {
+      setClearStatus("error");
+      setClearMessage(err instanceof Error ? err.message : "Clear failed — make sure you're logged in.");
+    }
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <div className="w-full max-w-md space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Upload a document</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Upload a <strong>.txt</strong> or <strong>.md</strong> file (max 4 MB).
-            The AI will be able to search it during chat.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Upload a document</h1>
+            <p className="text-sm text-zinc-500 mt-1">
+              Upload a <strong>.txt</strong> or <strong>.md</strong> file (max 4 MB).
+              The AI will be able to search it during chat.
+            </p>
+          </div>
+          <Link
+            href="/chat"
+            className="text-sm px-3 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 font-medium whitespace-nowrap ml-4"
+          >
+            ← Back
+          </Link>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,6 +125,34 @@ export default function DocumentsPage() {
         <p className="text-xs text-zinc-400">
           After uploading, return to the chat and ask a question about the document.
         </p>
+
+        {/* Clear RAG Section */}
+        <div className="border-t border-zinc-300 dark:border-zinc-700 pt-6 mt-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-bold">Clear RAG</h2>
+            <p className="text-sm text-zinc-500 mt-1">
+              Delete all uploaded documents from the system. <strong>This cannot be undone.</strong>
+            </p>
+          </div>
+
+          <button
+            onClick={handleClearRAG}
+            disabled={clearStatus === "clearing"}
+            className="w-full py-2 px-4 rounded-lg bg-red-900 dark:bg-red-900 text-white font-medium disabled:opacity-50 hover:bg-red-800"
+          >
+            {clearStatus === "clearing" ? "Clearing…" : "Clear All Documents"}
+          </button>
+
+          {clearMessage && (
+            <p className={`text-sm rounded-lg p-3 mt-3 ${
+              clearStatus === "success"
+                ? "bg-green-50 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                : "bg-red-50 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+            }`}>
+              {clearMessage}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

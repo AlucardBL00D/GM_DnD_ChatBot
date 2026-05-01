@@ -517,11 +517,12 @@ function PureMultimodalInput({
         />
         <PromptInputFooter className="px-3 pb-3">
           <PromptInputTools>
-            <AttachmentsButton
+            {/* AttachmentsButton disabled - file uploads not currently supported */}
+            {/* <AttachmentsButton
               fileInputRef={fileInputRef}
               selectedModelId={selectedModelId}
               status={status}
-            />
+            /> */}
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}

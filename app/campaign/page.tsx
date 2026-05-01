@@ -1,13 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function CampaignPage() {
   const [campaignName, setCampaignName] = useState("My D&D Campaign");
   const [characterName, setCharacterName] = useState("Unnamed Adventurer");
   const [characterClass, setCharacterClass] = useState("Fighter");
+  const [characterRace, setCharacterRace] = useState("Human");
+  const [level, setLevel] = useState(1);
   const [hp, setHp] = useState(25);
   const [maxHp, setMaxHp] = useState(25);
+  const [ac, setAc] = useState(10);
+  const [strength, setStrength] = useState(15);
+  const [dexterity, setDexterity] = useState(10);
+  const [constitution, setConstitution] = useState(14);
+  const [intelligence, setIntelligence] = useState(8);
+  const [wisdom, setWisdom] = useState(13);
+  const [charisma, setCharisma] = useState(11);
+  const [traits, setTraits] = useState("Brave\nLoyalty");
+  const [languages, setLanguages] = useState("Common");
+  const [inventory, setInventory] = useState("10m Rope\nTorch x5\nGold x50");
+  const [equipment, setEquipment] = useState("Long Sword\nPlate Armor");
+
+  // Sauvegarder les stats dans localStorage quand elles changent
+  useEffect(() => {
+    const characterStats = {
+      campaignName,
+      characterName,
+      characterClass,
+      race: characterRace,
+      level,
+      hp,
+      maxHp,
+      ac,
+      strength,
+      dexterity,
+      constitution,
+      intelligence,
+      wisdom,
+      charisma,
+      traits,
+      languages,
+      inventory,
+      equipment
+    };
+    localStorage.setItem("characterStats", JSON.stringify(characterStats));
+    
+    // Dispatch custom event so hook in other components listens
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("characterStatsUpdated"));
+    }
+  }, [campaignName, characterName, characterClass, characterRace, level, hp, maxHp, ac, strength, dexterity, constitution, intelligence, wisdom, charisma, traits, languages, inventory, equipment]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
@@ -68,6 +112,25 @@ export default function CampaignPage() {
                 <option>Wizard</option>
               </select>
             </div>
+
+            <div className="space-y-2">
+              <label className="block text-amber-200">Race</label>
+              <select
+                value={characterRace}
+                onChange={(e) => setCharacterRace(e.target.value)}
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100"
+              >
+                <option>Human</option>
+                <option>Elf</option>
+                <option>Dwarf</option>
+                <option>Halfling</option>
+                <option>Dragonborn</option>
+                <option>Gnome</option>
+                <option>Half-Elf</option>
+                <option>Half-Orc</option>
+                <option>Tiefling</option>
+              </select>
+            </div>
           </div>
 
           {/* HP Bar */}
@@ -89,6 +152,177 @@ export default function CampaignPage() {
               >
                 {hp > maxHp * 0.3 && <span className="text-white">{hp}</span>}
               </div>
+            </div>
+
+            <div className="space-y-1 pt-2">
+              <label className="text-amber-200 text-sm">Current HP</label>
+              <input
+                type="number"
+                value={hp}
+                onChange={(e) => setHp(parseInt(e.target.value) || 0)}
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100"
+              />
+            </div>
+
+            <div className="space-y-1 pt-2">
+              <label className="text-amber-200 text-sm">Max HP</label>
+              <input
+                type="number"
+                value={maxHp}
+                onChange={(e) => setMaxHp(parseInt(e.target.value) || 1)}
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100"
+              />
+            </div>
+          </div>
+
+          {/* Inventory */}
+          <div className="space-y-2">
+            <label className="text-amber-200">Inventory</label>
+            <textarea
+              value={inventory}
+              onChange={(e) => setInventory(e.target.value)}
+              placeholder="10m Rope
+Torch x5
+Gold x50"
+              className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100 h-24 font-mono text-sm"
+            />
+            <p className="text-amber-100/60 text-xs">One item per line (e.g.: "Torch x5", "10m Rope")</p>
+          </div>
+
+          {/* Equipment */}
+          <div className="space-y-2">
+            <label className="text-amber-200">Equipment</label>
+            <textarea
+              value={equipment}
+              onChange={(e) => setEquipment(e.target.value)}
+              placeholder="Long Sword
+Plate Armor"
+              className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100 h-20 font-mono text-sm"
+            />
+            <p className="text-amber-100/60 text-xs">Equipped items (one per line)</p>
+          </div>
+
+          {/* Level & AC */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-amber-200">Level</label>
+              <input
+                type="number"
+                min="1"
+                max="20"
+                value={level}
+                onChange={(e) => setLevel(parseInt(e.target.value) || 1)}
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-amber-200">AC (Armor Class)</label>
+              <input
+                type="number"
+                value={ac}
+                onChange={(e) => setAc(parseInt(e.target.value) || 10)}
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100"
+              />
+            </div>
+          </div>
+
+          {/* Ability Scores */}
+          <div className="space-y-3">
+            <h3 className="text-amber-200 font-semibold">Ability Scores</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <label className="text-amber-200 text-sm">STR (Force)</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="20"
+                  value={strength}
+                  onChange={(e) => setStrength(parseInt(e.target.value) || 3)}
+                  className="w-full bg-slate-900 border border-amber-700/50 rounded px-2 py-1 text-amber-100 text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-amber-200 text-sm">DEX (Dextérité)</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="20"
+                  value={dexterity}
+                  onChange={(e) => setDexterity(parseInt(e.target.value) || 3)}
+                  className="w-full bg-slate-900 border border-amber-700/50 rounded px-2 py-1 text-amber-100 text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-amber-200 text-sm">CON (Constitution)</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="20"
+                  value={constitution}
+                  onChange={(e) => setConstitution(parseInt(e.target.value) || 3)}
+                  className="w-full bg-slate-900 border border-amber-700/50 rounded px-2 py-1 text-amber-100 text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-amber-200 text-sm">INT (Intelligence)</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="20"
+                  value={intelligence}
+                  onChange={(e) => setIntelligence(parseInt(e.target.value) || 3)}
+                  className="w-full bg-slate-900 border border-amber-700/50 rounded px-2 py-1 text-amber-100 text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-amber-200 text-sm">WIS (Wisdom)</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="20"
+                  value={wisdom}
+                  onChange={(e) => setWisdom(parseInt(e.target.value) || 3)}
+                  className="w-full bg-slate-900 border border-amber-700/50 rounded px-2 py-1 text-amber-100 text-center"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-amber-200 text-sm">CHA (Charisma)</label>
+                <input
+                  type="number"
+                  min="3"
+                  max="20"
+                  value={charisma}
+                  onChange={(e) => setCharisma(parseInt(e.target.value) || 3)}
+                  className="w-full bg-slate-900 border border-amber-700/50 rounded px-2 py-1 text-amber-100 text-center"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Traits and Languages */}
+          <div className="space-y-3">
+            <h3 className="text-amber-200 font-semibold">Personality & Communication</h3>
+            <div className="space-y-2">
+              <label className="text-amber-200">Traits</label>
+              <textarea
+                value={traits}
+                onChange={(e) => setTraits(e.target.value)}
+                placeholder="Brave
+Loyalty"
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100 h-20 font-mono text-sm"
+              />
+              <p className="text-amber-100/60 text-xs">One trait per line (ex: "Brave", "Loyal")</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-amber-200">Languages</label>
+              <textarea
+                value={languages}
+                onChange={(e) => setLanguages(e.target.value)}
+                placeholder="Common"
+                className="w-full bg-slate-900 border border-amber-700/50 rounded px-4 py-2 text-amber-100 h-16 font-mono text-sm"
+              />
+              <p className="text-amber-100/60 text-xs">Languages known (one per line)</p>
             </div>
           </div>
         </div>

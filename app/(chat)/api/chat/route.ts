@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { id, message, messages, selectedChatModel, selectedVisibilityType } =
+    const { id, message, messages, selectedChatModel, selectedVisibilityType, characterContext } =
       requestBody;
 
     const [, session] = await Promise.all([
@@ -112,13 +112,18 @@ export async function POST(request: Request) {
       }
       messagesFromDb = await getMessagesByChatId({ id });
     } else if (message?.role === "user") {
+      // Use campaign name as title if available, otherwise generate from message
+      const chatTitle = characterContext?.campaignName || "New chat";
       await saveChat({
         id,
         userId: session.user.id,
-        title: "New chat",
+        title: chatTitle,
         visibility: selectedVisibilityType,
       });
-      titlePromise = generateTitleFromUserMessage({ message });
+      // Only generate title from message if we don't have a campaign name
+      if (!characterContext?.campaignName) {
+        titlePromise = generateTitleFromUserMessage({ message });
+      }
     }
 
     let uiMessages: ChatMessage[];
@@ -194,10 +199,11 @@ export async function POST(request: Request) {
     const stream = createUIMessageStream({
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
       execute: async ({ writer: dataStream }) => {
-      const bearerToken = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+        const bearerToken = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+
       const result = streamText({
         model: getLanguageModel(chatModel),
-        system: buildSystemPrompt(),
+        system: buildSystemPrompt(characterContext),
         messages: modelMessages,
         stopWhen: stepCountIs(5),
           experimental_activeTools:
@@ -228,7 +234,7 @@ export async function POST(request: Request) {
             }),
           },
           tools: {
-            ...createTools(bearerToken),
+            ...createTools(bearerToken, dataStream),
             getWeather,
             createDocument: createDocument({
               session,

@@ -2,19 +2,35 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { AccountNav } from "@/components/chat/account-nav";
+import { CharacterCreationDialog } from "@/components/chat/character-creation-dialog";
 
 export default function HomePage() {
   const { data: session } = useSession();
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 to-transparent"></div>
-        
-        <div className="relative max-w-6xl mx-auto px-4 py-20 sm:py-32">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+      {/* Navigation Header */}
+      <header className="sticky top-0 z-50 border-b border-amber-700/20 bg-slate-900/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 font-bold text-lg hover:opacity-75 transition">
+            <span className="text-2xl">⚔️</span>
+            <span className="hidden sm:inline text-amber-100">D&D Master AI</span>
+          </Link>
+          
+          <AccountNav session={session} />
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 to-transparent"></div>
+          
+          <div className="relative max-w-6xl mx-auto px-4 py-20 sm:py-32">
           <div className="text-center space-y-6">
             <h1 className="text-5xl sm:text-6xl font-bold">
-              <span className="text-amber-100">⚔️ D&D Campaign Master</span>
+              <span className="text-amber-100">⚔️ D&D Game Master</span>
             </h1>
             <p className="text-xl sm:text-2xl text-amber-200/80">
               Experience epic fantasy adventures powered by AI and the world's most loved tabletop game
@@ -122,17 +138,12 @@ export default function HomePage() {
             Set up your character and step into a world of infinite possibilities.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 px-6 py-3 rounded-lg font-bold text-amber-50 transition transform hover:scale-105"
-            >
-              🛡️ Create Character
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <CharacterCreationDialog session={session} />
             {session?.user?.type === "regular" && (
               <Link
                 href="/chat"
-                className="inline-flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg font-bold text-amber-100 border border-slate-600 transition"
+                className="flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 px-6 py-3 rounded-lg font-bold text-amber-100 border border-slate-600 transition transform hover:scale-105 h-11"
               >
                 💬 Go to Chat
               </Link>
@@ -152,6 +163,7 @@ export default function HomePage() {
           </p>
         </div>
       </div>
+      </main>
     </div>
   );
 }

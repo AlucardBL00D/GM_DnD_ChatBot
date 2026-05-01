@@ -119,3 +119,21 @@ export async function findRelevantChunks(
 
   return results;
 }
+
+// ---------------------------------------------------------------------------
+// Delete (remove all documents for a user)
+// ---------------------------------------------------------------------------
+
+/**
+ * Deletes all document chunks for a specific user from the RAG database.
+ * This completely clears the RAG of all their uploaded documents.
+ */
+export async function deleteAllDocuments(userId: string): Promise<{ deleted: number }> {
+  const result = await client`
+    DELETE FROM "DocumentChunk"
+    WHERE "userId" = ${userId}::uuid
+  `;
+
+  // result.count contains the number of rows deleted
+  return { deleted: result.count || 0 };
+}
