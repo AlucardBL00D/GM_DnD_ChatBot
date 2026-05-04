@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/app/(auth)/auth";
-import { SignOutButton } from "@/components/chat/sign-out-form";
+import { SignOutForm } from "@/components/chat/sign-out-form";
 
 export async function Navigation() {
   const session = await auth();
@@ -41,7 +41,7 @@ export async function Navigation() {
                   {session.user?.type === "guest" ? "Guest" : "Account"}
                 </p>
               </div>
-              <SignOutButton />
+              <SignOutForm />
             </div>
           ) : (
             <Link
