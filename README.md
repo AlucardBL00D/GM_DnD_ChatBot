@@ -1,5 +1,5 @@
 <a href="https://chatbot.ai-sdk.dev/demo">
-  <img alt="Chatbot" src="app/(chat)/opengraph-image.png">
+  <img alt="Chatbot" src="app/(chat)/Image-Read-Me.png">
   <h1 align="center">AI Dungeon Master Chatbot</h1>
 </a>
 
